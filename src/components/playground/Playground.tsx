@@ -6,9 +6,10 @@ import { CodeEditor } from './CodeEditor';
 import { Preview } from './Preview';
 import { NewFileDialog } from './NewFileDialog';
 import { ProjectTabs } from './ProjectTabs';
-import { Code2, Eye, Upload, Trash2 } from 'lucide-react';
+import { Code2, Eye, Upload, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export const Playground = () => {
   const {
@@ -33,7 +34,7 @@ export const Playground = () => {
   } = usePlayground();
 
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
-
+  const [isDropZoneOpen, setIsDropZoneOpen] = useState(false);
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
@@ -121,9 +122,24 @@ export const Playground = () => {
                         onContentChange={updateFileContent}
                       />
                     </div>
-                    <div className="p-2 bg-muted/30 shrink-0">
-                      <DropZone onFilesDropped={handleFileUpload} />
-                    </div>
+                    <Collapsible open={isDropZoneOpen} onOpenChange={setIsDropZoneOpen}>
+                      <CollapsibleTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full rounded-none border-t border-border gap-2 text-muted-foreground"
+                        >
+                          <Upload className="w-4 h-4" />
+                          Dateien hochladen
+                          {isDropZoneOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="p-2 bg-muted/30">
+                          <DropZone onFilesDropped={handleFileUpload} />
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </TabsContent>
                 
