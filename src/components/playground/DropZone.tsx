@@ -64,7 +64,7 @@ export const DropZone = ({ onFilesDropped }: DropZoneProps) => {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".html,.htm,.css,.js"
+        accept=".html,.htm,.css,.js,.ts,.json,.svg,.xml,.md"
         multiple
         onChange={handleFileInputChange}
         className="hidden"
@@ -90,16 +90,15 @@ export const DropZone = ({ onFilesDropped }: DropZoneProps) => {
           </p>
         </div>
         
-        <div className="flex flex-wrap justify-center gap-2">
-          <span className="px-2 py-1 text-xs font-medium rounded-md bg-[hsl(var(--file-html)/0.15)] text-[hsl(var(--file-html))]">
-            .HTML
-          </span>
-          <span className="px-2 py-1 text-xs font-medium rounded-md bg-[hsl(var(--file-css)/0.15)] text-[hsl(var(--file-css))]">
-            .CSS
-          </span>
-          <span className="px-2 py-1 text-xs font-medium rounded-md bg-[hsl(var(--file-js)/0.15)] text-[hsl(var(--file-js))]">
-            .JS
-          </span>
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {['HTML', 'CSS', 'JS', 'TS', 'JSON', 'SVG', 'XML', 'MD'].map(ext => (
+            <span 
+              key={ext}
+              className={`px-2 py-0.5 text-xs font-medium rounded-md bg-[hsl(var(--file-${ext.toLowerCase()})/0.15)] text-[hsl(var(--file-${ext.toLowerCase()}))]`}
+            >
+              .{ext}
+            </span>
+          ))}
         </div>
         
         <Button 

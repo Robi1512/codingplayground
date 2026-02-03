@@ -5,12 +5,21 @@ import { FileTabs } from './FileTabs';
 import { CodeEditor } from './CodeEditor';
 import { Preview } from './Preview';
 import { NewFileDialog } from './NewFileDialog';
+import { ProjectTabs } from './ProjectTabs';
 import { Code2, Eye, Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const Playground = () => {
   const {
+    projects,
+    activeProject,
+    activeProjectId,
+    setActiveProjectId,
+    addProject,
+    renameProject,
+    deleteProject,
+    duplicateProject,
     files,
     activeFile,
     activeFileId,
@@ -19,14 +28,11 @@ export const Playground = () => {
     updateFileContent,
     deleteFile,
     handleFileUpload,
+    clearAllFiles,
     getPreviewHtml,
   } = usePlayground();
 
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
-
-  const clearAllFiles = () => {
-    files.forEach(file => deleteFile(file.id));
-  };
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -39,7 +45,7 @@ export const Playground = () => {
           <div>
             <h1 className="text-lg font-bold text-foreground">Code Playground</h1>
             <p className="text-xs text-muted-foreground hidden sm:block">
-              HTML • CSS • JavaScript
+              HTML • CSS • JS • TS • JSON • SVG • XML • MD
             </p>
           </div>
         </div>
@@ -60,6 +66,17 @@ export const Playground = () => {
         </div>
       </header>
 
+      {/* Project Tabs */}
+      <ProjectTabs
+        projects={projects}
+        activeProjectId={activeProjectId}
+        onSelectProject={setActiveProjectId}
+        onAddProject={() => addProject()}
+        onDeleteProject={deleteProject}
+        onDuplicateProject={duplicateProject}
+        onRenameProject={renameProject}
+      />
+
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {files.length === 0 ? (
@@ -73,9 +90,9 @@ export const Playground = () => {
           /* Editor/Preview Layout */
           <div className="h-full flex flex-col lg:flex-row">
             {/* Mobile Tabs */}
-            <div className="lg:hidden">
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'editor' | 'preview')}>
-                <div className="px-4 pt-2 bg-muted/30">
+            <div className="lg:hidden h-full flex flex-col">
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'editor' | 'preview')} className="flex flex-col h-full">
+                <div className="px-4 pt-2 bg-muted/30 shrink-0">
                   <TabsList className="w-full">
                     <TabsTrigger value="editor" className="flex-1 gap-2">
                       <Code2 className="w-4 h-4" />
@@ -88,9 +105,9 @@ export const Playground = () => {
                   </TabsList>
                 </div>
                 
-                <TabsContent value="editor" className="mt-0 h-[calc(100vh-140px)]">
+                <TabsContent value="editor" className="mt-0 flex-1 overflow-hidden">
                   <div className="h-full flex flex-col">
-                    <div className="bg-muted/30 pt-2">
+                    <div className="bg-muted/30 pt-2 shrink-0">
                       <FileTabs
                         files={files}
                         activeFileId={activeFileId}
@@ -104,13 +121,13 @@ export const Playground = () => {
                         onContentChange={updateFileContent}
                       />
                     </div>
-                    <div className="p-2 bg-muted/30">
+                    <div className="p-2 bg-muted/30 shrink-0">
                       <DropZone onFilesDropped={handleFileUpload} />
                     </div>
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="preview" className="mt-0 h-[calc(100vh-140px)]">
+                <TabsContent value="preview" className="mt-0 flex-1 overflow-hidden">
                   <div className="h-full p-4 bg-muted/30">
                     <div className="h-full rounded-xl overflow-hidden shadow-lg border border-border">
                       <Preview html={getPreviewHtml()} />
@@ -135,7 +152,7 @@ export const Playground = () => {
                     <Upload className="w-4 h-4 text-muted-foreground" />
                     <input
                       type="file"
-                      accept=".html,.htm,.css,.js"
+                      accept=".html,.htm,.css,.js,.ts,.json,.svg,.xml,.md"
                       multiple
                       onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
                       className="hidden"
@@ -155,6 +172,9 @@ export const Playground = () => {
                 <div className="bg-muted/30 px-4 py-3 border-b border-border flex items-center gap-2">
                   <Eye className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-muted-foreground">Preview</span>
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {activeProject?.name}
+                  </span>
                 </div>
                 <div className="flex-1 p-4 bg-muted/30">
                   <div className="h-full rounded-xl overflow-hidden shadow-lg border border-border">
