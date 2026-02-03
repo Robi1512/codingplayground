@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileType } from '@/types/playground';
+import { FileType, FILE_TYPE_INFO } from '@/types/playground';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -9,11 +9,25 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Plus, FileCode, FileText, Braces } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { FileIcon } from './FileIcon';
 
 interface NewFileDialogProps {
   onCreateFile: (name: string, content: string, type: FileType) => void;
 }
+
+const defaultContents: Record<FileType, string> = {
+  html: '<!DOCTYPE html>\n<html lang="de">\n<head>\n  <meta charset="UTF-8">\n  <title>Meine Seite</title>\n</head>\n<body>\n  <h1>Hallo Welt!</h1>\n</body>\n</html>',
+  css: '/* Dein CSS hier */\nbody {\n  font-family: sans-serif;\n  margin: 0;\n  padding: 20px;\n}',
+  js: '// Dein JavaScript hier\nconsole.log("Hallo Welt!");',
+  ts: '// Dein TypeScript hier\nconst greeting: string = "Hallo Welt!";\nconsole.log(greeting);',
+  json: '{\n  "name": "Mein Projekt",\n  "version": "1.0.0"\n}',
+  svg: '<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">\n  <circle cx="50" cy="50" r="40" fill="#4f46e5" />\n</svg>',
+  xml: '<?xml version="1.0" encoding="UTF-8"?>\n<root>\n  <item>Inhalt</item>\n</root>',
+  md: '# Überschrift\n\nDein Markdown-Text hier...',
+};
+
+const allFileTypes: FileType[] = ['html', 'css', 'js', 'ts', 'json', 'svg', 'xml', 'md'];
 
 export const NewFileDialog = ({ onCreateFile }: NewFileDialogProps) => {
   const [open, setOpen] = useState(false);
@@ -23,25 +37,13 @@ export const NewFileDialog = ({ onCreateFile }: NewFileDialogProps) => {
   const handleCreate = () => {
     if (!fileName.trim()) return;
     
-    const extension = selectedType === 'html' ? '.html' : selectedType === 'css' ? '.css' : '.js';
-    const finalName = fileName.includes('.') ? fileName : `${fileName}${extension}`;
+    const info = FILE_TYPE_INFO[selectedType];
+    const finalName = fileName.includes('.') ? fileName : `${fileName}${info.extension}`;
     
-    const defaultContent = selectedType === 'html' 
-      ? '<!DOCTYPE html>\n<html lang="de">\n<head>\n  <meta charset="UTF-8">\n  <title>Meine Seite</title>\n</head>\n<body>\n  <h1>Hallo Welt!</h1>\n</body>\n</html>'
-      : selectedType === 'css'
-      ? '/* Dein CSS hier */\nbody {\n  font-family: sans-serif;\n  margin: 0;\n  padding: 20px;\n}'
-      : '// Dein JavaScript hier\nconsole.log("Hallo Welt!");';
-    
-    onCreateFile(finalName, defaultContent, selectedType);
+    onCreateFile(finalName, defaultContents[selectedType], selectedType);
     setFileName('');
     setOpen(false);
   };
-
-  const typeButtons: { type: FileType; icon: React.ReactNode; label: string }[] = [
-    { type: 'html', icon: <FileCode className="w-5 h-5" />, label: 'HTML' },
-    { type: 'css', icon: <FileText className="w-5 h-5" />, label: 'CSS' },
-    { type: 'js', icon: <Braces className="w-5 h-5" />, label: 'JS' },
-  ];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -51,41 +53,37 @@ export const NewFileDialog = ({ onCreateFile }: NewFileDialogProps) => {
           <span className="hidden sm:inline">Neue Datei</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Neue Datei erstellen</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 pt-4">
-          <div className="flex gap-2">
-            {typeButtons.map(({ type, icon, label }) => (
-              <button
-                key={type}
-                onClick={() => setSelectedType(type)}
-                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                  selectedType === type
-                    ? type === 'html' 
-                      ? 'border-[hsl(var(--file-html))] bg-[hsl(var(--file-html)/0.1)]'
-                      : type === 'css'
-                      ? 'border-[hsl(var(--file-css))] bg-[hsl(var(--file-css)/0.1)]'
-                      : 'border-[hsl(var(--file-js))] bg-[hsl(var(--file-js)/0.1)]'
-                    : 'border-border hover:border-muted-foreground/50'
-                }`}
-              >
-                <div className={
-                  type === 'html' ? 'icon-html' 
-                  : type === 'css' ? 'icon-css' 
-                  : 'icon-js'
-                }>
-                  {icon}
-                </div>
-                <span className="text-sm font-medium">{label}</span>
-              </button>
-            ))}
+          <div className="grid grid-cols-4 gap-2">
+            {allFileTypes.map(type => {
+              const info = FILE_TYPE_INFO[type];
+              const isSelected = selectedType === type;
+              
+              return (
+                <button
+                  key={type}
+                  onClick={() => setSelectedType(type)}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all ${
+                    isSelected
+                      ? 'border-current bg-current/10'
+                      : 'border-border hover:border-muted-foreground/50'
+                  }`}
+                  style={isSelected ? { color: `hsl(${info.color})` } : undefined}
+                >
+                  <FileIcon type={type} className="w-5 h-5" />
+                  <span className="text-xs font-medium">{info.label}</span>
+                </button>
+              );
+            })}
           </div>
           
           <Input
-            placeholder="Dateiname (z.B. index)"
+            placeholder={`Dateiname (z.B. index${FILE_TYPE_INFO[selectedType].extension})`}
             value={fileName}
             onChange={(e) => setFileName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}

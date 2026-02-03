@@ -43,10 +43,18 @@
     --file-html: 16 85% 57%;
     --file-css: 207 90% 54%;
     --file-js: 48 89% 50%;
+    --file-ts: 211 60% 48%;
+    --file-json: 141 71% 48%;
+    --file-svg: 280 65% 60%;
+    --file-xml: 25 95% 53%;
+    --file-md: 199 89% 48%;
     
     --preview-bg: 0 0% 100%;
     --drop-zone: 220 70% 50%;
     --drop-zone-hover: 220 70% 55%;
+    
+    --project-tab: 220 15% 94%;
+    --project-tab-active: 220 70% 50%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -123,19 +131,30 @@
     @apply flex items-center gap-2 cursor-pointer;
   }
   
-  .file-tab-html {
-    @apply border-b-2;
-    border-color: hsl(var(--file-html));
+  .file-tab-html { @apply border-b-2; border-color: hsl(var(--file-html)); }
+  .file-tab-css { @apply border-b-2; border-color: hsl(var(--file-css)); }
+  .file-tab-js { @apply border-b-2; border-color: hsl(var(--file-js)); }
+  .file-tab-ts { @apply border-b-2; border-color: hsl(var(--file-ts)); }
+  .file-tab-json { @apply border-b-2; border-color: hsl(var(--file-json)); }
+  .file-tab-svg { @apply border-b-2; border-color: hsl(var(--file-svg)); }
+  .file-tab-xml { @apply border-b-2; border-color: hsl(var(--file-xml)); }
+  .file-tab-md { @apply border-b-2; border-color: hsl(var(--file-md)); }
+  
+  .icon-ts { color: hsl(var(--file-ts)); }
+  .icon-json { color: hsl(var(--file-json)); }
+  .icon-svg { color: hsl(var(--file-svg)); }
+  .icon-xml { color: hsl(var(--file-xml)); }
+  .icon-md { color: hsl(var(--file-md)); }
+  
+  .project-tab {
+    @apply px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200;
+    @apply flex items-center gap-2 cursor-pointer border-b-2 border-transparent;
+    background: hsl(var(--project-tab));
   }
   
-  .file-tab-css {
-    @apply border-b-2;
-    border-color: hsl(var(--file-css));
-  }
-  
-  .file-tab-js {
-    @apply border-b-2;
-    border-color: hsl(var(--file-js));
+  .project-tab-active {
+    @apply bg-card shadow-sm;
+    border-color: hsl(var(--project-tab-active));
   }
   
   .drop-zone {
