@@ -44,10 +44,17 @@
     --file-css: 207 90% 54%;
     --file-js: 48 89% 50%;
     --file-ts: 211 60% 48%;
+    --file-jsx: 48 89% 50%;
+    --file-tsx: 211 60% 48%;
     --file-json: 141 71% 48%;
     --file-svg: 280 65% 60%;
     --file-xml: 25 95% 53%;
     --file-md: 199 89% 48%;
+    --file-txt: 220 10% 50%;
+    --file-yaml: 280 50% 55%;
+    --file-ini: 220 30% 50%;
+    --file-csv: 160 60% 45%;
+    --file-sql: 200 70% 50%;
     
     --preview-bg: 0 0% 100%;
     --drop-zone: 220 70% 50%;
@@ -55,6 +62,20 @@
     
     --project-tab: 220 15% 94%;
     --project-tab-active: 220 70% 50%;
+
+    /* Syntax highlighting colors */
+    --syntax-comment: 220 10% 50%;
+    --syntax-keyword: 280 80% 60%;
+    --syntax-string: 120 60% 45%;
+    --syntax-number: 30 80% 55%;
+    --syntax-function: 200 80% 60%;
+    --syntax-tag: 16 85% 57%;
+    --syntax-attr-name: 48 80% 55%;
+    --syntax-attr-value: 120 60% 45%;
+    --syntax-punctuation: 220 10% 60%;
+    --syntax-operator: 280 60% 60%;
+    --syntax-property: 200 70% 60%;
+    --syntax-selector: 280 80% 60%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -100,6 +121,16 @@
     --editor-line: 220 20% 15%;
     
     --preview-bg: 0 0% 100%;
+
+    /* Darker syntax colors for dark mode */
+    --syntax-comment: 220 10% 45%;
+    --syntax-keyword: 280 80% 70%;
+    --syntax-string: 120 60% 55%;
+    --syntax-number: 30 80% 65%;
+    --syntax-function: 200 80% 70%;
+    --syntax-tag: 16 85% 65%;
+    --syntax-attr-name: 48 80% 65%;
+    --syntax-attr-value: 120 60% 55%;
   }
 }
 
@@ -115,6 +146,133 @@
 }
 
 @layer components {
+  /* Code editor with syntax highlighting */
+  .code-editor-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: hsl(var(--editor-bg));
+  }
+
+  .code-highlight,
+  .code-textarea {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    tab-size: 2;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: auto;
+  }
+
+  .code-highlight {
+    pointer-events: none;
+    color: hsl(var(--editor-foreground));
+    z-index: 1;
+  }
+
+  .code-textarea {
+    background: transparent;
+    color: transparent;
+    caret-color: hsl(var(--editor-foreground));
+    z-index: 2;
+    resize: none;
+    border: none;
+    outline: none;
+  }
+
+  .code-textarea::selection {
+    background: hsl(var(--editor-selection));
+  }
+
+  .code-textarea:focus {
+    outline: none;
+  }
+
+  /* Prism.js syntax highlighting theme */
+  .code-highlight .token.comment,
+  .code-highlight .token.prolog,
+  .code-highlight .token.doctype,
+  .code-highlight .token.cdata {
+    color: hsl(var(--syntax-comment));
+    font-style: italic;
+  }
+
+  .code-highlight .token.punctuation {
+    color: hsl(var(--syntax-punctuation));
+  }
+
+  .code-highlight .token.property,
+  .code-highlight .token.tag,
+  .code-highlight .token.boolean,
+  .code-highlight .token.number,
+  .code-highlight .token.constant,
+  .code-highlight .token.symbol {
+    color: hsl(var(--syntax-number));
+  }
+
+  .code-highlight .token.tag {
+    color: hsl(var(--syntax-tag));
+  }
+
+  .code-highlight .token.selector,
+  .code-highlight .token.attr-name,
+  .code-highlight .token.string,
+  .code-highlight .token.char,
+  .code-highlight .token.builtin {
+    color: hsl(var(--syntax-attr-name));
+  }
+
+  .code-highlight .token.string,
+  .code-highlight .token.attr-value {
+    color: hsl(var(--syntax-string));
+  }
+
+  .code-highlight .token.operator,
+  .code-highlight .token.entity,
+  .code-highlight .token.url,
+  .code-highlight .language-css .token.string,
+  .code-highlight .style .token.string {
+    color: hsl(var(--syntax-operator));
+  }
+
+  .code-highlight .token.atrule,
+  .code-highlight .token.keyword {
+    color: hsl(var(--syntax-keyword));
+  }
+
+  .code-highlight .token.function,
+  .code-highlight .token.class-name {
+    color: hsl(var(--syntax-function));
+  }
+
+  .code-highlight .token.regex,
+  .code-highlight .token.important,
+  .code-highlight .token.variable {
+    color: hsl(var(--syntax-property));
+  }
+
+  .code-highlight .token.important,
+  .code-highlight .token.bold {
+    font-weight: bold;
+  }
+
+  .code-highlight .token.italic {
+    font-style: italic;
+  }
+
+  .code-highlight .token.entity {
+    cursor: help;
+  }
+
+  /* Legacy editor textarea (fallback) */
   .editor-textarea {
     @apply w-full h-full resize-none font-mono text-sm leading-relaxed p-4;
     background: hsl(var(--editor-bg));
@@ -128,23 +286,40 @@
   
   .file-tab {
     @apply px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200;
-    @apply flex items-center gap-2 cursor-pointer;
+    @apply flex items-center gap-2 cursor-pointer select-none;
   }
   
   .file-tab-html { @apply border-b-2; border-color: hsl(var(--file-html)); }
   .file-tab-css { @apply border-b-2; border-color: hsl(var(--file-css)); }
   .file-tab-js { @apply border-b-2; border-color: hsl(var(--file-js)); }
   .file-tab-ts { @apply border-b-2; border-color: hsl(var(--file-ts)); }
+  .file-tab-jsx { @apply border-b-2; border-color: hsl(var(--file-jsx)); }
+  .file-tab-tsx { @apply border-b-2; border-color: hsl(var(--file-tsx)); }
   .file-tab-json { @apply border-b-2; border-color: hsl(var(--file-json)); }
   .file-tab-svg { @apply border-b-2; border-color: hsl(var(--file-svg)); }
   .file-tab-xml { @apply border-b-2; border-color: hsl(var(--file-xml)); }
   .file-tab-md { @apply border-b-2; border-color: hsl(var(--file-md)); }
+  .file-tab-txt { @apply border-b-2; border-color: hsl(var(--file-txt)); }
+  .file-tab-yaml { @apply border-b-2; border-color: hsl(var(--file-yaml)); }
+  .file-tab-ini { @apply border-b-2; border-color: hsl(var(--file-ini)); }
+  .file-tab-csv { @apply border-b-2; border-color: hsl(var(--file-csv)); }
+  .file-tab-sql { @apply border-b-2; border-color: hsl(var(--file-sql)); }
   
+  .icon-html { color: hsl(var(--file-html)); }
+  .icon-css { color: hsl(var(--file-css)); }
+  .icon-js { color: hsl(var(--file-js)); }
   .icon-ts { color: hsl(var(--file-ts)); }
+  .icon-jsx { color: hsl(var(--file-jsx)); }
+  .icon-tsx { color: hsl(var(--file-tsx)); }
   .icon-json { color: hsl(var(--file-json)); }
   .icon-svg { color: hsl(var(--file-svg)); }
   .icon-xml { color: hsl(var(--file-xml)); }
   .icon-md { color: hsl(var(--file-md)); }
+  .icon-txt { color: hsl(var(--file-txt)); }
+  .icon-yaml { color: hsl(var(--file-yaml)); }
+  .icon-ini { color: hsl(var(--file-ini)); }
+  .icon-csv { color: hsl(var(--file-csv)); }
+  .icon-sql { color: hsl(var(--file-sql)); }
   
   .project-tab {
     @apply px-4 py-2 text-sm font-medium rounded-t-lg transition-all duration-200;
@@ -176,18 +351,6 @@
   .glass-panel {
     @apply bg-card/80 backdrop-blur-xl border border-border/50;
     @apply shadow-lg shadow-black/5;
-  }
-  
-  .icon-html {
-    color: hsl(var(--file-html));
-  }
-  
-  .icon-css {
-    color: hsl(var(--file-css));
-  }
-  
-  .icon-js {
-    color: hsl(var(--file-js));
   }
 }
 

@@ -1,10 +1,12 @@
 import { useState, useCallback, useRef } from 'react';
-import { Upload, FolderOpen, FileCode } from 'lucide-react';
+import { Upload, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface DropZoneProps {
   onFilesDropped: (files: FileList | File[]) => void;
 }
+
+const FILE_EXTENSIONS = ['HTML', 'CSS', 'JS', 'TS', 'JSX', 'TSX', 'JSON', 'SVG', 'XML', 'MD', 'TXT', 'YAML', 'INI', 'CSV', 'SQL'];
 
 export const DropZone = ({ onFilesDropped }: DropZoneProps) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -64,7 +66,7 @@ export const DropZone = ({ onFilesDropped }: DropZoneProps) => {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".html,.htm,.css,.js,.ts,.json,.svg,.xml,.md"
+        accept=".html,.htm,.css,.js,.ts,.jsx,.tsx,.json,.svg,.xml,.md,.txt,.yaml,.yml,.ini,.conf,.cfg,.csv,.sql"
         multiple
         onChange={handleFileInputChange}
         className="hidden"
@@ -91,10 +93,10 @@ export const DropZone = ({ onFilesDropped }: DropZoneProps) => {
         </div>
         
         <div className="flex flex-wrap justify-center gap-1.5">
-          {['HTML', 'CSS', 'JS', 'TS', 'JSON', 'SVG', 'XML', 'MD'].map(ext => (
+          {FILE_EXTENSIONS.map(ext => (
             <span 
               key={ext}
-              className={`px-2 py-0.5 text-xs font-medium rounded-md bg-[hsl(var(--file-${ext.toLowerCase()})/0.15)] text-[hsl(var(--file-${ext.toLowerCase()}))]`}
+              className="px-2 py-0.5 text-xs font-medium rounded-md bg-muted text-muted-foreground"
             >
               .{ext}
             </span>

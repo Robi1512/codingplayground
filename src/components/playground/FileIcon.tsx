@@ -1,5 +1,5 @@
 import { FileType } from '@/types/playground';
-import { FileCode, FileText, Braces, FileJson, Image, Code, FileType2 } from 'lucide-react';
+import { FileCode, FileText, Braces, FileJson, Image, Code, FileType2, Database, Settings } from 'lucide-react';
 
 interface FileIconProps {
   type: FileType;
@@ -18,6 +18,10 @@ export const FileIcon = ({ type, className = '' }: FileIconProps) => {
       return <Braces className={`${baseClass} icon-js`} />;
     case 'ts':
       return <Code className={`${baseClass} icon-ts`} />;
+    case 'jsx':
+      return <Braces className={`${baseClass} icon-jsx`} />;
+    case 'tsx':
+      return <Code className={`${baseClass} icon-tsx`} />;
     case 'json':
       return <FileJson className={`${baseClass} icon-json`} />;
     case 'svg':
@@ -26,6 +30,16 @@ export const FileIcon = ({ type, className = '' }: FileIconProps) => {
       return <FileCode className={`${baseClass} icon-xml`} />;
     case 'md':
       return <FileType2 className={`${baseClass} icon-md`} />;
+    case 'txt':
+      return <FileText className={`${baseClass} icon-txt`} />;
+    case 'yaml':
+      return <Settings className={`${baseClass} icon-yaml`} />;
+    case 'ini':
+      return <Settings className={`${baseClass} icon-ini`} />;
+    case 'csv':
+      return <Database className={`${baseClass} icon-csv`} />;
+    case 'sql':
+      return <Database className={`${baseClass} icon-sql`} />;
     default:
       return <FileText className={baseClass} />;
   }
