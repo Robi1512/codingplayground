@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { PlaygroundFile, FileType, Project } from '@/types/playground';
+
+const STORAGE_KEY = 'playground-state';
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
@@ -17,6 +19,10 @@ const getFileType = (filename: string): FileType | null => {
     case 'ts':
     case 'typescript':
       return 'ts';
+    case 'jsx':
+      return 'jsx';
+    case 'tsx':
+      return 'tsx';
     case 'json':
       return 'json';
     case 'svg':
@@ -26,8 +32,22 @@ const getFileType = (filename: string): FileType | null => {
     case 'md':
     case 'markdown':
       return 'md';
+    case 'txt':
+    case 'text':
+      return 'txt';
+    case 'yaml':
+    case 'yml':
+      return 'yaml';
+    case 'ini':
+    case 'conf':
+    case 'cfg':
+      return 'ini';
+    case 'csv':
+      return 'csv';
+    case 'sql':
+      return 'sql';
     default:
-      return null;
+      return 'txt'; // Default to txt for unknown file types
   }
 };
 
@@ -39,9 +59,56 @@ const createDefaultProject = (name: string = 'Projekt 1'): Project => ({
   createdAt: Date.now(),
 });
 
+const loadFromStorage = (): { projects: Project[]; activeProjectId: string } => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.projects && data.projects.length > 0) {
+        return {
+          projects: data.projects,
+          activeProjectId: data.activeProjectId || data.projects[0].id,
+        };
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load from localStorage:', e);
+  }
+  
+  const defaultProject = createDefaultProject();
+  return {
+    projects: [defaultProject],
+    activeProjectId: defaultProject.id,
+  };
+};
+
+const saveToStorage = (projects: Project[], activeProjectId: string) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ projects, activeProjectId }));
+  } catch (e) {
+    console.error('Failed to save to localStorage:', e);
+  }
+};
+
 export const usePlayground = () => {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [projects, setProjects] = useState<Project[]>([createDefaultProject()]);
   const [activeProjectId, setActiveProjectId] = useState<string>(projects[0].id);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const { projects: loadedProjects, activeProjectId: loadedActiveId } = loadFromStorage();
+    setProjects(loadedProjects);
+    setActiveProjectId(loadedActiveId);
+    setIsInitialized(true);
+  }, []);
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    if (isInitialized) {
+      saveToStorage(projects, activeProjectId);
+    }
+  }, [projects, activeProjectId, isInitialized]);
 
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
   const activeFile = activeProject?.files.find(f => f.id === activeProject.activeFileId) || null;
@@ -150,6 +217,18 @@ export const usePlayground = () => {
     );
   }, [activeProjectId]);
 
+  const reorderFiles = useCallback((fromIndex: number, toIndex: number) => {
+    setProjects(prev =>
+      prev.map(p => {
+        if (p.id !== activeProjectId) return p;
+        const newFiles = [...p.files];
+        const [removed] = newFiles.splice(fromIndex, 1);
+        newFiles.splice(toIndex, 0, removed);
+        return { ...p, files: newFiles };
+      })
+    );
+  }, [activeProjectId]);
+
   const handleFileUpload = useCallback(async (fileList: FileList | File[]) => {
     const filesArray = Array.from(fileList);
     
@@ -176,8 +255,8 @@ export const usePlayground = () => {
     const files = activeProject?.files || [];
     const htmlFiles = files.filter(f => f.type === 'html');
     const cssFiles = files.filter(f => f.type === 'css');
-    const jsFiles = files.filter(f => f.type === 'js');
-    const tsFiles = files.filter(f => f.type === 'ts');
+    const jsFiles = files.filter(f => f.type === 'js' || f.type === 'jsx');
+    const tsFiles = files.filter(f => f.type === 'ts' || f.type === 'tsx');
     const svgFiles = files.filter(f => f.type === 'svg');
     const jsonFiles = files.filter(f => f.type === 'json');
 
@@ -240,6 +319,15 @@ ${jsContent}
 </html>`;
   }, [activeProject?.files]);
 
+  const openPreviewInNewWindow = useCallback(() => {
+    const html = getPreviewHtml();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    // Clean up the URL after a delay
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, [getPreviewHtml]);
+
   return {
     // Projects
     projects,
@@ -258,8 +346,10 @@ ${jsContent}
     addFile,
     updateFileContent,
     deleteFile,
+    reorderFiles,
     handleFileUpload,
     clearAllFiles,
     getPreviewHtml,
+    openPreviewInNewWindow,
   };
 };

@@ -6,7 +6,7 @@ import { CodeEditor } from './CodeEditor';
 import { Preview } from './Preview';
 import { NewFileDialog } from './NewFileDialog';
 import { ProjectTabs } from './ProjectTabs';
-import { Code2, Eye, Upload, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Code2, Eye, Upload, Trash2, ChevronUp, ChevronDown, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -28,13 +28,16 @@ export const Playground = () => {
     addFile,
     updateFileContent,
     deleteFile,
+    reorderFiles,
     handleFileUpload,
     clearAllFiles,
     getPreviewHtml,
+    openPreviewInNewWindow,
   } = usePlayground();
 
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
   const [isDropZoneOpen, setIsDropZoneOpen] = useState(false);
+
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
@@ -46,7 +49,7 @@ export const Playground = () => {
           <div>
             <h1 className="text-lg font-bold text-foreground">Code Playground</h1>
             <p className="text-xs text-muted-foreground hidden sm:block">
-              HTML • CSS • JS • TS • JSON • SVG • XML • MD
+              HTML • CSS • JS • TS • JSX • TSX • JSON • SVG • XML • MD
             </p>
           </div>
         </div>
@@ -54,15 +57,26 @@ export const Playground = () => {
         <div className="flex items-center gap-2">
           <NewFileDialog onCreateFile={addFile} />
           {files.length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={clearAllFiles}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span className="hidden sm:inline ml-2">Alle löschen</span>
-            </Button>
+            <>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={openPreviewInNewWindow}
+                title="Preview in neuem Fenster öffnen"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span className="hidden sm:inline ml-2">Öffnen</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearAllFiles}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="hidden sm:inline ml-2">Alle löschen</span>
+              </Button>
+            </>
           )}
         </div>
       </header>
@@ -114,6 +128,7 @@ export const Playground = () => {
                         activeFileId={activeFileId}
                         onSelectFile={setActiveFileId}
                         onDeleteFile={deleteFile}
+                        onReorderFiles={reorderFiles}
                       />
                     </div>
                     <div className="flex-1 overflow-hidden">
@@ -144,8 +159,19 @@ export const Playground = () => {
                 </TabsContent>
                 
                 <TabsContent value="preview" className="mt-0 flex-1 overflow-hidden">
-                  <div className="h-full p-4 bg-muted/30">
-                    <div className="h-full rounded-xl overflow-hidden shadow-lg border border-border">
+                  <div className="h-full flex flex-col p-4 bg-muted/30">
+                    <div className="flex justify-end mb-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={openPreviewInNewWindow}
+                        className="gap-2"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        In neuem Fenster
+                      </Button>
+                    </div>
+                    <div className="flex-1 rounded-xl overflow-hidden shadow-lg border border-border">
                       <Preview html={getPreviewHtml()} />
                     </div>
                   </div>
@@ -163,12 +189,13 @@ export const Playground = () => {
                     activeFileId={activeFileId}
                     onSelectFile={setActiveFileId}
                     onDeleteFile={deleteFile}
+                    onReorderFiles={reorderFiles}
                   />
                   <label className="p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors mb-1">
                     <Upload className="w-4 h-4 text-muted-foreground" />
                     <input
                       type="file"
-                      accept=".html,.htm,.css,.js,.ts,.json,.svg,.xml,.md"
+                      accept=".html,.htm,.css,.js,.ts,.jsx,.tsx,.json,.svg,.xml,.md,.txt,.yaml,.yml,.ini,.conf,.cfg,.csv,.sql"
                       multiple
                       onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
                       className="hidden"
@@ -188,9 +215,18 @@ export const Playground = () => {
                 <div className="bg-muted/30 px-4 py-3 border-b border-border flex items-center gap-2">
                   <Eye className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-muted-foreground">Preview</span>
-                  <span className="text-xs text-muted-foreground ml-auto">
+                  <span className="text-xs text-muted-foreground ml-auto mr-2">
                     {activeProject?.name}
                   </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={openPreviewInNewWindow}
+                    className="h-7 px-2"
+                    title="In neuem Fenster öffnen"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
                 </div>
                 <div className="flex-1 p-4 bg-muted/30">
                   <div className="h-full rounded-xl overflow-hidden shadow-lg border border-border">

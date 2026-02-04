@@ -21,13 +21,20 @@ const defaultContents: Record<FileType, string> = {
   css: '/* Dein CSS hier */\nbody {\n  font-family: sans-serif;\n  margin: 0;\n  padding: 20px;\n}',
   js: '// Dein JavaScript hier\nconsole.log("Hallo Welt!");',
   ts: '// Dein TypeScript hier\nconst greeting: string = "Hallo Welt!";\nconsole.log(greeting);',
+  jsx: '// Dein JSX hier\nfunction App() {\n  return <h1>Hallo Welt!</h1>;\n}',
+  tsx: '// Dein TSX hier\ninterface Props { name: string; }\nfunction Greeting({ name }: Props) {\n  return <h1>Hallo {name}!</h1>;\n}',
   json: '{\n  "name": "Mein Projekt",\n  "version": "1.0.0"\n}',
   svg: '<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">\n  <circle cx="50" cy="50" r="40" fill="#4f46e5" />\n</svg>',
   xml: '<?xml version="1.0" encoding="UTF-8"?>\n<root>\n  <item>Inhalt</item>\n</root>',
   md: '# Überschrift\n\nDein Markdown-Text hier...',
+  txt: 'Dein Text hier...',
+  yaml: '# YAML Konfiguration\nname: mein-projekt\nversion: 1.0.0',
+  ini: '; Konfigurationsdatei\n[section]\nkey=value',
+  csv: 'name,alter,stadt\nMax,25,Berlin\nAnna,30,Hamburg',
+  sql: '-- SQL Abfrage\nSELECT * FROM users WHERE active = true;',
 };
 
-const allFileTypes: FileType[] = ['html', 'css', 'js', 'ts', 'json', 'svg', 'xml', 'md'];
+const allFileTypes: FileType[] = ['html', 'css', 'js', 'ts', 'jsx', 'tsx', 'json', 'svg', 'xml', 'md', 'txt', 'yaml', 'ini', 'csv', 'sql'];
 
 export const NewFileDialog = ({ onCreateFile }: NewFileDialogProps) => {
   const [open, setOpen] = useState(false);
@@ -59,7 +66,7 @@ export const NewFileDialog = ({ onCreateFile }: NewFileDialogProps) => {
         </DialogHeader>
         
         <div className="space-y-4 pt-4">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-2">
             {allFileTypes.map(type => {
               const info = FILE_TYPE_INFO[type];
               const isSelected = selectedType === type;
@@ -68,7 +75,7 @@ export const NewFileDialog = ({ onCreateFile }: NewFileDialogProps) => {
                 <button
                   key={type}
                   onClick={() => setSelectedType(type)}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all ${
+                  className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border-2 transition-all ${
                     isSelected
                       ? 'border-current bg-current/10'
                       : 'border-border hover:border-muted-foreground/50'
